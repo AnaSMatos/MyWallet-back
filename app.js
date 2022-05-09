@@ -74,14 +74,44 @@ app.post("/sign-in", async (req, res) => {
     }
 });
 
-app.get("/main", (req, res) => {
+app.get("/main", async (req, res) => {
     const {authorization} = req.headers;
-    console.log(authorization)
+    const token = authorization.substring("Bearer ".length)
+    try{
+        const online = await db.collection('sessions').findOne({token});
+        if(!online){
+            return res.sendStatus(498);
+        }
+        const data = await db.collection('data').find({userId: online.userId}).toArray();
+        res.send(data);
+    }catch{
+        res.sendStatus(422)
+    }
+})
+
+app.post("/transactions", async(req, res) => {
+    const {authorization} = req.headers;
+    const token = authorization.substring("Bearer ".length)
+    const today = new Date();
+    const date = `${today.getDate()}/${today.getMonth()+1}`
+    try{
+        const online = await db.collection('sessions').findOne({token});
+        if(!online){
+            return res.sendStatus(498);
+        }
+        await db.collection('data').insertOne({
+            ...req.body,
+            userId: online.userId,
+            date
+            })
+
+        res.status("Sucesso!").status(201)
+    }catch{
+        res.sendStatus(422)
+    }
 })
 
 app.listen(process.env.PORT, () => {
     console.log(`conectado na porta ${process.env.PORT}`)
 })
 
-//POST ENTRADA
-//POST SAIDA
