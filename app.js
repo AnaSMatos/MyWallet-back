@@ -24,7 +24,7 @@ promise.then(()=>{
 
 promise.catch(e=>console.log("erro ao conectar"))
 
-//JOI
+
 const signupSchema = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().email().required(),
@@ -32,7 +32,6 @@ const signupSchema = Joi.object({
     confirmPassword: Joi.ref('password')
 }) 
 
-//POST SIGN UP - OK
 app.post("/sign-up", async (req, res) => {
     const {name, email, password, confirmPassword} = req.body;
     const validation = signupSchema.validate(req.body)
