@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
+
 import {MongoClient} from "mongodb"
 import Joi from "joi"
 import bcrypt from 'bcrypt';
@@ -58,17 +59,17 @@ app.post("/sign-up", async (req, res) => {
     }
 })
 
-//POST SIGN IN
 
 app.post("/sign-in", async (req, res) => {
     const { email, password } = req.body;
     const user = await db.collection('users').findOne({ email });
+    const name = user.name
     if(user && bcrypt.compareSync(password, user.password)) {
         const token = uuid();
         await db.collection("sessions").insertOne({
             userId: user._id, token
         })
-        res.send(token)
+        res.send({token, name})
     } else {
         res.status(422).send("Usuário ou senha incorretos")
     }
