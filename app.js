@@ -54,7 +54,7 @@ app.post("/sign-up", async (req, res) => {
 
 
     }catch{
-        res.send("deu TRETA!")
+        res.sendStatus(500)
     }
 })
 
