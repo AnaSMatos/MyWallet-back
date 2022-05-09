@@ -4,9 +4,9 @@ import dotenv from "dotenv"
 import {MongoClient} from "mongodb"
 import Joi from "joi"
 import bcrypt from 'bcrypt';
+import { v4 as uuid } from 'uuid';
 
 dotenv.config();
-const port = 5000;
 
 const app = express()
 app.use(express.json())
@@ -31,7 +31,7 @@ const signupSchema = Joi.object({
     confirmPassword: Joi.ref('password')
 }) 
 
-//POST SIGN UP
+//POST SIGN UP - OK
 app.post("/sign-up", async (req, res) => {
     const {name, email, password, confirmPassword} = req.body;
     const validation = signupSchema.validate(req.body)
@@ -41,10 +41,10 @@ app.post("/sign-up", async (req, res) => {
             email: email
         })
         if(checkAccount){
-            return res.send("Email já cadastrado").status(409);
+            return res.status(409).send("Email já cadastrado");
         }
         if(validation.error){
-            return res.send("Preencha os dados corretamente").status(422)
+            return res.status(422).send("Preencha os dados corretamente")
         }
 
         await db.collection('users').insertOne({
@@ -64,14 +64,23 @@ app.post("/sign-in", async (req, res) => {
     const { email, password } = req.body;
     const user = await db.collection('users').findOne({ email });
     if(user && bcrypt.compareSync(password, user.password)) {
-        res.send("login efetuado com sucesso").status(200)
+        const token = uuid();
+        await db.collection("sessions").insertOne({
+            userId: user._id, token
+        })
+        res.send(token)
     } else {
-        res.send("usuário ou senha incorretos").status(404)
+        res.status(422).send("Usuário ou senha incorretos")
     }
 });
 
-app.listen(port, () => {
-    console.log(`conectado na porta ${port}`)
+app.get("/main", (req, res) => {
+    const {authorization} = req.headers;
+    console.log(authorization)
+})
+
+app.listen(process.env.PORT, () => {
+    console.log(`conectado na porta ${process.env.PORT}`)
 })
 
 //POST ENTRADA
