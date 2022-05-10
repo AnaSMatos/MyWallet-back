@@ -1,7 +1,9 @@
+//Só consegui fazer funcionar assim :( mas deixei o resto que fiquei
+//fazendo até a hora da entrega.
+
 import express from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-
 import {MongoClient} from "mongodb"
 import Joi from "joi"
 import bcrypt from 'bcrypt';
@@ -24,7 +26,7 @@ promise.then(()=>{
 
 promise.catch(e=>console.log("erro ao conectar"))
 
-//JOI
+
 const signupSchema = Joi.object({
     name: Joi.string().required(),
     email: Joi.string().email().required(),
@@ -32,7 +34,6 @@ const signupSchema = Joi.object({
     confirmPassword: Joi.ref('password')
 }) 
 
-//POST SIGN UP - OK
 app.post("/sign-up", async (req, res) => {
     const {name, email, password, confirmPassword} = req.body;
     const validation = signupSchema.validate(req.body)
@@ -55,7 +56,7 @@ app.post("/sign-up", async (req, res) => {
 
 
     }catch{
-        res.send("deu TRETA!")
+        res.sendStatus(500)
     }
 })
 
@@ -115,4 +116,3 @@ app.post("/transactions", async(req, res) => {
 app.listen(process.env.PORT, () => {
     console.log(`conectado na porta ${process.env.PORT}`)
 })
-
